@@ -24,6 +24,8 @@ public class CoordinateGrouping {
             index++;
         }
         scannerBaseStationList.close();
+        Collections.sort(baseStationList, Comparator.comparingDouble(BaseStation::getCoverageRadius).reversed());
+
 
         index = 0;
         File dosya = new File("src/DeviceList");

@@ -9,4 +9,7 @@ public class BaseStation {
         this.coverageRadius = Radius;
         this.isGrouped = false;
     }
+    public double getCoverageRadius() {
+        return coverageRadius;
+    }
 }

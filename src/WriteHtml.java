@@ -25,6 +25,7 @@ public class WriteHtml {
                 "      background-color: blue;\n" +
                 "      border-radius: 50%;\n" +
                 "      z-index: 1;\n" +
+                "      animation: blinkAnimation 1s infinite;"+
                 "    }\n" +
                 "    .station {\n" +
                 "      position: absolute;\n" +
@@ -36,6 +37,11 @@ public class WriteHtml {
                 "      opacity: 0.4;\n" +
                 "      z-index: 0;\n" +
                 "    }\n" +
+                " @keyframes blinkAnimation {\n" +
+                "      0% { opacity: 1; }\n" +
+                "      50% { opacity: 0.3; }\n" +
+                "      100% { opacity: 1; }\n" +
+                "    }"+
                 "  </style>\n" +
                 "</head>\n" +
                 "<body>\n" +
@@ -81,9 +87,9 @@ public class WriteHtml {
                 "        deviceElement.style.left = deviceX + 'px';\n" +
                 "        canvas.appendChild(deviceElement);\n" +
                 "  if (device.isConnected) {\n" +
-                "        deviceElement.style.backgroundColor = 'green';\n" +
+                "        deviceElement.style.backgroundColor = '#05ee26';\n" +
                 "    } else {\n" +
-                "        deviceElement.style.backgroundColor = 'orange';\n" +
+                "        deviceElement.style.backgroundColor = '#ffe59e';\n" +
                 "    }"+
                 "      });\n" +
                 "    }\n" +
