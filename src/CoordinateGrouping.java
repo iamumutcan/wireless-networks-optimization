@@ -6,7 +6,7 @@ public class CoordinateGrouping {
     public static void main(String[] args) throws FileNotFoundException {
         List<Device> deviceList = new ArrayList<>();
         Map<Integer, Device> deviceMap = new HashMap<>();
-
+        List<Group> baseStationDeviceList= new ArrayList<>();
         List<BaseStation> baseStationList = new ArrayList<>();
         // Yeni cihazları liste üzerinde tutma
         int index = 0;
@@ -36,38 +36,58 @@ public class CoordinateGrouping {
             Device device = new Device(index, x, y);
             deviceList.add(device);
             deviceMap.put(index, device);
-
-            devicestring+="{ x:"+x+", y: "+y+" },";
             index++;
         }
         scanner.close();
 
-        double threshold = 80.0; // Yakınlık eşiği
-        int maxCapacity=5;
-        Map<Integer, List<Device>> groups = groupCoordinates(deviceList, threshold,maxCapacity);
 
-        int maxGroupSize = 0;
-        List<Device> maxGroup = null;
+        int gindex=1;
+        for (BaseStation baseStation : baseStationList) { // gruplanmamış istasyon seçilir
+            double middlepointx = 0;
+            double middlepointy = 0;
+            double sumx=0;
+            double sumy=0;
+            List<Device> tempDeviceList = new ArrayList<>();
+            if (baseStation.isGrouped == false) {
+                double threshold = baseStation.coverageRadius; // Yakınlık eşiği
+                int maxCapacity=baseStation.maxCapacity;
+                Map<Integer, List<Device>> groups = groupCoordinates(deviceList, threshold,maxCapacity);
 
-        for (List<Device> group : groups.values()) {
-            if (group.size() > maxGroupSize) {
-                maxGroupSize = group.size();
-                maxGroup = group;
+                int maxGroupSize = 0;
+                List<Device> maxGroup = null;
+
+                for (List<Device> group : groups.values()) {
+                    if (group.size() > maxGroupSize) {
+                        maxGroupSize = group.size();
+                        maxGroup = group;
+                    }
+                }
+
+                if (maxGroup != null) {
+                    for (Device device : maxGroup) {
+                        device.isConnected = true;
+
+                        sumx+=device.x;
+                        sumy+=device.y;
+                    }
+                }
+                 middlepointx = sumx/maxGroupSize;
+                 middlepointy = sumy/maxGroupSize;
+                System.out.println("En çok elemana sahip olan grup: " + maxGroupSize);
+                System.out.println("Grup: " + maxGroup);
+                System.out.println("X: "+middlepointx +" Y: "+middlepointy);
+
             }
+            basestationstring+="{ x:"+middlepointx+", y: "+middlepointy+", range: "+baseStation.coverageRadius+" },";
+            baseStationDeviceList.add(new Group(gindex,middlepointx,middlepointy,baseStation.maxCapacity,baseStation.coverageRadius,tempDeviceList));
+            gindex++;
         }
-
-        if (maxGroup != null) {
-            for (Device device : maxGroup) {
-                device.isConnected = true;
-            }
-        }
-
-        System.out.println("En çok elemana sahip olan grup: " + maxGroupSize);
-        System.out.println("Grup: " + maxGroup);
-        System.out.println("Cihazlar:");
         for (Device device : deviceList) {
             System.out.println(device);
+            devicestring+="{ x:"+device.x+", y: "+device.y+",isConnected:"+device.isConnected+" },";
         }
+        WriteHtml whtml= new WriteHtml();
+        whtml.basestation(devicestring,basestationstring);
     }
 
     public static Map<Integer, List<Device>> groupCoordinates(List<Device> deviceList, double threshold, int maxCapacity) {
@@ -75,23 +95,27 @@ public class CoordinateGrouping {
         int groupId = 0;
 
         for (Device device : deviceList) {
-            boolean foundGroup = false;
-            for (List<Device> group : groups.values()) {
-                Device reference = group.get(0);
-                double distance = getDistance(device, reference);
+            if(device.isConnected==false)
+            {
+                boolean foundGroup = false;
+                for (List<Device> group : groups.values()) {
+                    Device reference = group.get(0);
+                    double distance = getDistance(device, reference);
 
-                if (distance <= threshold&&group.size()<maxCapacity) {
-                    group.add(device);
-                    foundGroup = true;
-                    break;
+                    if (distance <= threshold&&group.size()<maxCapacity) {
+                        group.add(device);
+                        foundGroup = true;
+                        break;
+                    }
+                }
+                if (!foundGroup) {
+                    List<Device> newGroup = new ArrayList<>();
+                    newGroup.add(device);
+                    groups.put(groupId, newGroup);
+                    groupId++;
                 }
             }
-            if (!foundGroup) {
-                List<Device> newGroup = new ArrayList<>();
-                newGroup.add(device);
-                groups.put(groupId, newGroup);
-                groupId++;
-            }
+
         }
 
         return groups;

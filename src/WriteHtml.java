@@ -80,6 +80,11 @@ public class WriteHtml {
                 "        deviceElement.style.top = deviceY + 'px';\n" +
                 "        deviceElement.style.left = deviceX + 'px';\n" +
                 "        canvas.appendChild(deviceElement);\n" +
+                "  if (device.isConnected) {\n" +
+                "        deviceElement.style.backgroundColor = 'green';\n" +
+                "    } else {\n" +
+                "        deviceElement.style.backgroundColor = 'orange';\n" +
+                "    }"+
                 "      });\n" +
                 "    }\n" +
                 "\n" +
